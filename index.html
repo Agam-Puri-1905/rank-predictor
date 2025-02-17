@@ -47,9 +47,9 @@
     </div>
 
     <script>
-       async function fetchData() {
+     async function fetchData() {
     try {
-        const response = await fetch('https://raw.githubusercontent.com/Agam-Puri-1905/rank-predictor/refs/heads/main/rank_data.json');
+        const response = await fetch('https://Agam-Puri-1905.github.io/rank-predictor/rank_data.json');
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -60,7 +60,6 @@
         alert("Failed to load data. Ensure 'rank_data.json' is accessible.");
     }
 }
-
 
 function populateDatalists(data) {
     const institutes = ["All", ...new Set(data.map(item => item.Institute || "Unknown"))];
@@ -83,6 +82,7 @@ function fillDatalist(id, values) {
 
 // Run fetchData() when the page loads
 fetchData();
+
 
 
     function predictRank() {
