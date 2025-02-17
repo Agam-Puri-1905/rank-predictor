@@ -98,12 +98,13 @@ fetchData();
     const seatType = document.getElementById("seatType").value || "All";
     const gender = document.getElementById("gender").value || "All";
 
-    // Construct query string correctly
+    // Construct the query string to pass user selections
     const queryString = `?institute=${encodeURIComponent(institute)}&program=${encodeURIComponent(program)}&quota=${encodeURIComponent(quota)}&seatType=${encodeURIComponent(seatType)}&gender=${encodeURIComponent(gender)}&rank=${encodeURIComponent(rank)}`;
 
-    // Redirect to Wix results page
-    window.location.href = "https://www.collegesimplified.in/results" + queryString;
+    // Redirect to the results page
+    window.location.href = `results.html${queryString}`;
 }
+
 
 
         fetchData();
