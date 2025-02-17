@@ -47,56 +47,62 @@
     </div>
 
     <script>
-        async function fetchData() {
-            try {
-                const response = await fetch('https://Agam-Puri-1905.github.io/rank-predictor/rank_data.json
-');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
-                populateDatalists(data);
-            } catch (error) {
-                console.error("Error fetching JSON data:", error);
-                alert("Failed to load data. Ensure 'rank_data.json' is accessible.");
-            }
+       async function fetchData() {
+    try {
+        const response = await fetch('https://Agam-Puri-1905.github.io/rank-predictor/rank_data.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
+        const data = await response.json();
+        populateDatalists(data);
+    } catch (error) {
+        console.error("Error fetching JSON data:", error);
+        alert("Failed to load data. Ensure 'rank_data.json' is accessible.");
+    }
+}
 
-        function populateDatalists(data) {
-            const institutes = ["All", ...new Set(data.map(item => item.Institute))];
-            const programs = ["All", ...new Set(data.map(item => item.AcademicProgram))];
-            const quotas = ["All", ...new Set(data.map(item => item.Quota))];
-            const seatTypes = ["All", ...new Set(data.map(item => item.SeatType))];
-            const genders = ["All", ...new Set(data.map(item => item.Gender))];
+function populateDatalists(data) {
+    const institutes = ["All", ...new Set(data.map(item => item.Institute || "Unknown"))];
+    const programs = ["All", ...new Set(data.map(item => item.AcademicProgram || "Unknown"))];
+    const quotas = ["All", ...new Set(data.map(item => item.Quota || "Unknown"))];
+    const seatTypes = ["All", ...new Set(data.map(item => item.SeatType || "Unknown"))];
+    const genders = ["All", ...new Set(data.map(item => item.Gender || "Unknown"))];
 
-            fillDatalist('instituteList', institutes);
-            fillDatalist('programList', programs);
-            fillDatalist('quotaList', quotas);
-            fillDatalist('seatTypeList', seatTypes);
-            fillDatalist('genderList', genders);
-        }
+    fillDatalist('instituteList', institutes);
+    fillDatalist('programList', programs);
+    fillDatalist('quotaList', quotas);
+    fillDatalist('seatTypeList', seatTypes);
+    fillDatalist('genderList', genders);
+}
 
-        function fillDatalist(id, values) {
-            const datalist = document.getElementById(id);
-            datalist.innerHTML = values.map(val => `<option value="${val}">${val}</option>`).join('');
-        }
+function fillDatalist(id, values) {
+    const datalist = document.getElementById(id);
+    datalist.innerHTML = values.map(val => `<option value="${val}">${val}</option>`).join('');
+}
 
-        function predictRank() {
-            const rank = document.getElementById("rank").value;
-            if (!rank) {
-                alert("Please enter your rank.");
-                return;
-            }
+// Run fetchData() when the page loads
+fetchData();
 
-            const institute = document.getElementById("institute").value;
-            const program = document.getElementById("program").value;
-            const quota = document.getElementById("quota").value;
-            const seatType = document.getElementById("seatType").value;
-            const gender = document.getElementById("gender").value;
 
-            const queryString = `?institute=${encodeURIComponent(institute)}&program=${encodeURIComponent(program)}&quota=${encodeURIComponent(quota)}&seatType=${encodeURIComponent(seatType)}&gender=${encodeURIComponent(gender)}&rank=${encodeURIComponent(rank)}`;
-            window.location.href = `results.html${queryString}`;
-        }
+     function predictRank() {
+    const rank = document.getElementById("rank").value;
+    if (!rank) {
+        alert("Please enter your rank.");
+        return;
+    }
+
+    const institute = document.getElementById("institute").value || "All";
+    const program = document.getElementById("program").value || "All";
+    const quota = document.getElementById("quota").value || "All";
+    const seatType = document.getElementById("seatType").value || "All";
+    const gender = document.getElementById("gender").value || "All";
+
+    // Construct the query string to pass user selections
+    const queryString = `?institute=${encodeURIComponent(institute)}&program=${encodeURIComponent(program)}&quota=${encodeURIComponent(quota)}&seatType=${encodeURIComponent(seatType)}&gender=${encodeURIComponent(gender)}&rank=${encodeURIComponent(rank)}`;
+
+    // Redirect to the results page
+    window.location.href = `results.html${queryString}`;
+}
 
         fetchData();
     </script>
