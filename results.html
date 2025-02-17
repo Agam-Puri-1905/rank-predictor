@@ -32,46 +32,58 @@
     </div>
 
     <script>
-        async function fetchResults() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const institute = urlParams.get("institute");
-                const program = urlParams.get("program");
-                const quota = urlParams.get("quota");
-                const seatType = urlParams.get("seatType");
-                const gender = urlParams.get("gender");
-                const rank = parseInt(urlParams.get("rank"));
+       async function fetchResults() {
+    try {
+        // Read query parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const institute = urlParams.get("institute");
+        const program = urlParams.get("program");
+        const quota = urlParams.get("quota");
+        const seatType = urlParams.get("seatType");
+        const gender = urlParams.get("gender");
+        const rank = parseInt(urlParams.get("rank"));
 
-                const response = await fetch('https://Agam-Puri-1905.github.io/rank-predictor/rank_data.json');
-                const data = await response.json();
+        console.log("URL Parameters:", { institute, program, quota, seatType, gender, rank }); // Debugging
 
-                const filteredData = data.filter(item =>
-                    (institute === "All" || item.Institute === institute) &&
-                    (program === "All" || item.AcademicProgram === program) &&
-                    (quota === "All" || item.Quota === quota) &&
-                    (seatType === "All" || item.SeatType === seatType) &&
-                    (gender === "All" || item.Gender === gender) &&
-                    rank >= item.OpeningRank && rank <= item.ClosingRank
-                );
+        // Fetch rank data
+        const response = await fetch('https://Agam-Puri-1905.github.io/rank-predictor/rank_data.json');
+        const data = await response.json();
 
-                const tbody = document.getElementById("results").querySelector("tbody");
-                tbody.innerHTML = filteredData.length > 0 ? filteredData.map(row => `
-                    <tr>
-                        <td>${row.Institute}</td>
-                        <td>${row.AcademicProgram}</td>
-                        <td>${row.Quota}</td>
-                        <td>${row.SeatType}</td>
-                        <td>${row.Gender}</td>
-                        <td>${row.OpeningRank}</td>
-                        <td>${row.ClosingRank}</td>
-                    </tr>
-                `).join('') : "<tr><td colspan='7'>No results found.</td></tr>";
-            } catch (error) {
-                console.error("Error fetching JSON data:", error);
-            }
-        }
+        console.log("Fetched Data:", data); // Debugging
 
-        fetchResults();
+        // Apply filters
+        const filteredData = data.filter(item =>
+            (institute === "All" || item.Institute === institute) &&
+            (program === "All" || item.AcademicProgram === program) &&
+            (quota === "All" || item.Quota === quota) &&
+            (seatType === "All" || item.SeatType === seatType) &&
+            (gender === "All" || item.Gender === gender) &&
+            rank >= item.OpeningRank && rank <= item.ClosingRank
+        );
+
+        console.log("Filtered Results:", filteredData); // Debugging
+
+        // Display results
+        const tbody = document.getElementById("results").querySelector("tbody");
+        tbody.innerHTML = filteredData.length > 0 ? filteredData.map(row => `
+            <tr>
+                <td>${row.Institute}</td>
+                <td>${row.AcademicProgram}</td>
+                <td>${row.Quota}</td>
+                <td>${row.SeatType}</td>
+                <td>${row.Gender}</td>
+                <td>${row.OpeningRank}</td>
+                <td>${row.ClosingRank}</td>
+            </tr>
+        `).join('') : "<tr><td colspan='7'>No results found.</td></tr>";
+    } catch (error) {
+        console.error("Error fetching JSON data:", error);
+    }
+}
+
+// Run fetchResults() when the page loads
+fetchResults();
+
     </script>
 </body>
 </html>
