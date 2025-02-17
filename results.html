@@ -46,7 +46,7 @@
         console.log("URL Parameters:", { institute, program, quota, seatType, gender, rank }); // Debugging
 
         // Fetch rank data
-        const response = await fetch('https://Agam-Puri-1905.github.io/rank-predictor/rank_data.json');
+        const response = await fetch('https://raw.githubusercontent.com/Agam-Puri-1905/rank-predictor/refs/heads/main/rank_data.json');
         const data = await response.json();
 
         console.log("Fetched Data:", data); // Debugging
