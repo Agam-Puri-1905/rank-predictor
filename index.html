@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opening and Closing Ranks</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
+        h2 { color: #0056b3; font-weight: bold; }
+        form { display: flex; flex-direction: column; gap: 10px; }
+        label { font-weight: bold; }
+        input, button { font-size: 16px; padding: 8px; width: 100%; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Opening and Closing Ranks</h2>
+        <form id="rankForm">
+            <label for="institute">Institute:</label>
+            <input list="instituteList" id="institute" required>
+            <datalist id="instituteList"></datalist>
+            
+            <label for="program">Academic Program:</label>
+            <input list="programList" id="program" required>
+            <datalist id="programList"></datalist>
+            
+            <label for="quota">Quota:</label>
+            <input list="quotaList" id="quota" required>
+            <datalist id="quotaList"></datalist>
+            
+            <label for="seatType">Seat Type:</label>
+            <input list="seatTypeList" id="seatType" required>
+            <datalist id="seatTypeList"></datalist>
+            
+            <label for="gender">Gender:</label>
+            <input list="genderList" id="gender" required>
+            <datalist id="genderList"></datalist>
+            
+            <label for="rank">Enter Your Rank:</label>
+            <input type="number" id="rank" required>
+            
+            <button type="button" onclick="predictRank()">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        async function fetchData() {
+            try {
+                const response = await fetch('https://yourusername.github.io/rank-predictor/rank_data.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                populateDatalists(data);
+            } catch (error) {
+                console.error("Error fetching JSON data:", error);
+                alert("Failed to load data. Ensure 'rank_data.json' is accessible.");
+            }
+        }
+
+        function populateDatalists(data) {
+            const institutes = ["All", ...new Set(data.map(item => item.Institute))];
+            const programs = ["All", ...new Set(data.map(item => item.AcademicProgram))];
+            const quotas = ["All", ...new Set(data.map(item => item.Quota))];
+            const seatTypes = ["All", ...new Set(data.map(item => item.SeatType))];
+            const genders = ["All", ...new Set(data.map(item => item.Gender))];
+
+            fillDatalist('instituteList', institutes);
+            fillDatalist('programList', programs);
+            fillDatalist('quotaList', quotas);
+            fillDatalist('seatTypeList', seatTypes);
+            fillDatalist('genderList', genders);
+        }
+
+        function fillDatalist(id, values) {
+            const datalist = document.getElementById(id);
+            datalist.innerHTML = values.map(val => `<option value="${val}">${val}</option>`).join('');
+        }
+
+        function predictRank() {
+            const rank = document.getElementById("rank").value;
+            if (!rank) {
+                alert("Please enter your rank.");
+                return;
+            }
+
+            const institute = document.getElementById("institute").value;
+            const program = document.getElementById("program").value;
+            const quota = document.getElementById("quota").value;
+            const seatType = document.getElementById("seatType").value;
+            const gender = document.getElementById("gender").value;
+
+            const queryString = `?institute=${encodeURIComponent(institute)}&program=${encodeURIComponent(program)}&quota=${encodeURIComponent(quota)}&seatType=${encodeURIComponent(seatType)}&gender=${encodeURIComponent(gender)}&rank=${encodeURIComponent(rank)}`;
+            window.location.href = `results.html${queryString}`;
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
