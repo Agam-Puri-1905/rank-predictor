@@ -52,16 +52,24 @@
     </div>
 
     <script>
-        async function fetchData() {
-            try {
-                const response = await fetch("https://agam-puri-1905.github.io/rank-predictor/rank_data.json");
-                const data = await response.json();
-                populateDropdowns(data);
-            } catch (error) {
-                alert("Failed to load data.");
-                console.error(error);
-            }
+      async function fetchData() {
+    try {
+        // Try fetching from the local JSON file
+        const response = await fetch("rank_data.json");
+
+        // If fetch fails, try an alternative hosting URL
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
+
+        const data = await response.json();
+        populateDropdowns(data);
+    } catch (error) {
+        alert("Failed to load data. Ensure 'rank_data.json' is accessible.");
+        console.error(error);
+    }
+}
+
 
         function populateDropdowns(data) {
             const institutes = ["All", ...new Set(data.map(item => item.Institute))];
