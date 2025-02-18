@@ -5,124 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Opening and Closing Ranks</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 20px; 
-            user-select: none; /* Disable text selection */
-        }
-        .container { 
-            max-width: 800px; 
-            margin: auto; 
-            border: 1px solid #ddd; 
-            padding: 20px; 
-            border-radius: 5px; 
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
         h2 { color: #0056b3; font-weight: bold; }
         form { display: flex; flex-direction: column; gap: 10px; }
         label { font-weight: bold; }
-        input, button { font-size: 16px; padding: 8px; width: 100%; border: 1px solid #ccc; border-radius: 4px; }
+        select, input, button { font-size: 16px; padding: 8px; width: 100%; border: 1px solid #ccc; border-radius: 4px; }
         button { background-color: #007bff; color: white; border: none; cursor: pointer; }
         button:hover { background-color: #0056b3; }
-
-        /* Prevent Screenshot */
-        @media screen and (-webkit-min-device-pixel-ratio:0) {
-            body {
-                filter: blur(10px);
-            }
-        }
-
-        /* Watermark */
-        #watermark {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2rem;
-            color: rgba(255, 0, 0, 0.3);
-            z-index: 1000;
-            pointer-events: none;
-        }
     </style>
 </head>
-<body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
-    <div id="watermark">Confidential Data - No Screenshots Allowed</div>
-    
+<body>
     <div class="container">
         <h2>Opening and Closing Ranks</h2>
         <form id="rankForm">
             <label for="institute">Institute:</label>
-            <input list="instituteList" id="institute" required>
-            <datalist id="instituteList"></datalist>
-            
+            <select id="institute" required>
+                <option value="" disabled selected>Select your option</option>
+            </select>
+
             <label for="program">Academic Program:</label>
-            <input list="programList" id="program" required>
-            <datalist id="programList"></datalist>
-            
+            <select id="program" required>
+                <option value="" disabled selected>Select your option</option>
+            </select>
+
             <label for="quota">Quota:</label>
-            <input list="quotaList" id="quota" required>
-            <datalist id="quotaList"></datalist>
-            
+            <select id="quota" required>
+                <option value="" disabled selected>Select your option</option>
+            </select>
+
             <label for="seatType">Seat Type:</label>
-            <input list="seatTypeList" id="seatType" required>
-            <datalist id="seatTypeList"></datalist>
-            
+            <select id="seatType" required>
+                <option value="" disabled selected>Select your option</option>
+            </select>
+
             <label for="gender">Gender:</label>
-            <input list="genderList" id="gender" required>
-            <datalist id="genderList"></datalist>
-            
+            <select id="gender" required>
+                <option value="" disabled selected>Select your option</option>
+            </select>
+
             <label for="rank">Enter Your Rank:</label>
             <input type="number" id="rank" required>
-            
-            <button type="button" onclick="predictRank()">Submit</button>
+
+            <button type="button" onclick="redirectToResults()">Submit</button>
         </form>
     </div>
 
     <script>
         async function fetchData() {
             try {
-                const jsonUrl = "rank_data.json"; // Works locally and on GitHub
-                console.log("Fetching JSON from:", jsonUrl);
-
-                const response = await fetch(jsonUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
+                const response = await fetch("rank_data.json");
                 const data = await response.json();
-                console.log("Fetched Data:", data);
-                populateDatalists(data);
+                populateDropdowns(data);
             } catch (error) {
-                console.error("Error fetching JSON data:", error);
-                alert("Failed to load data. Ensure 'rank_data.json' is accessible.");
+                alert("Failed to load data.");
+                console.error(error);
             }
         }
 
-        function predictRank() {
+        function populateDropdowns(data) {
+            const institutes = ["All", ...new Set(data.map(item => item.Institute))];
+            const programs = ["All", ...new Set(data.map(item => item.AcademicProgram))];
+            const quotas = ["All", ...new Set(data.map(item => item.Quota))];
+            const seatTypes = ["All", ...new Set(data.map(item => item.SeatType))];
+            const genders = ["All", ...new Set(data.map(item => item.Gender))];
+
+            fillDropdown('institute', institutes);
+            fillDropdown('program', programs);
+            fillDropdown('quota', quotas);
+            fillDropdown('seatType', seatTypes);
+            fillDropdown('gender', genders);
+        }
+
+        function fillDropdown(id, values) {
+            const select = document.getElementById(id);
+            select.innerHTML += values.map(val => `<option value="${val}">${val}</option>`).join('');
+        }
+
+        function redirectToResults() {
+            const institute = document.getElementById("institute").value;
+            const program = document.getElementById("program").value;
+            const quota = document.getElementById("quota").value;
+            const seatType = document.getElementById("seatType").value;
+            const gender = document.getElementById("gender").value;
             const rank = document.getElementById("rank").value;
-            if (!rank) {
-                alert("Please enter your rank.");
+
+            if (!rank || !institute || !program || !quota || !seatType || !gender) {
+                alert("Please select all options before submitting.");
                 return;
             }
 
-            const institute = document.getElementById("institute").value || "All";
-            const program = document.getElementById("program").value || "All";
-            const quota = document.getElementById("quota").value || "All";
-            const seatType = document.getElementById("seatType").value || "All";
-            const gender = document.getElementById("gender").value || "All";
-
-            const queryString = `?institute=${encodeURIComponent(institute)}&program=${encodeURIComponent(program)}&quota=${encodeURIComponent(quota)}&seatType=${encodeURIComponent(seatType)}&gender=${encodeURIComponent(gender)}&rank=${encodeURIComponent(rank)}`;
-            window.location.href = `results.html${queryString}`;
+            const queryParams = new URLSearchParams({ institute, program, quota, seatType, gender, rank }).toString();
+            window.location.href = `results.html?${queryParams}`;
         }
-
-        // Prevent Print Screen screenshot
-        document.addEventListener("keydown", function (event) {
-            if (event.key === "PrintScreen") {
-                alert("Screenshots are disabled.");
-                document.body.style.opacity = "0"; 
-                setTimeout(() => { document.body.style.opacity = "1"; }, 500);
-                event.preventDefault();
-            }
-        });
 
         fetchData();
     </script>
