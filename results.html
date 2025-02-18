@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rank Prediction Results</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
         body { 
             font-family: Arial, sans-serif; 
             margin: 20px; 
             user-select: none;
         }
-        
         
         h2 { color: #0056b3; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -29,7 +30,11 @@
         }
     </style>
 </head>
-<body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
+<body>
+    <div class="header">
+        <h2>Your Custom Header</h2>
+    </div>
+
     <div id="watermark">Confidential Data - No Screenshots Allowed</div>
 
     <div class="container">
@@ -49,7 +54,13 @@
             <tbody></tbody>
         </table>
     </div>
-
+    
+    <button onclick="downloadPDF()">Download as PDF</button>
+    
+    <div class="footer">
+        <p>Your Custom Footer</p>
+    </div>
+    
     <script>
         async function fetchResults() {
             try {
@@ -73,7 +84,7 @@
                     (filters.seatType === "All" || item.SeatType === filters.seatType) &&
                     (filters.gender === "All" || item.Gender === filters.gender) &&
                     rank >= item.OpeningRank && rank <= item.ClosingRank
-                );
+                ).slice(0, 15);
 
                 document.querySelector("tbody").innerHTML = filteredData.length ? filteredData.map(row => `
                     <tr><td>${row.Institute}</td><td>${row.AcademicProgram}</td><td>${row.Quota}</td><td>${row.SeatType}</td><td>${row.Gender}</td><td>${row.OpeningRank}</td><td>${row.ClosingRank}</td></tr>
@@ -82,6 +93,15 @@
                 alert("Failed to load data.");
                 console.error(error);
             }
+        }
+
+        function downloadPDF() {
+            const jsPDF = window.jspdf.jsPDF;
+            const doc = new jsPDF();
+            doc.text("Your Custom Header", 20, 10);
+            doc.autoTable({ html: "#results" });
+            doc.text("Your Custom Footer", 20, doc.internal.pageSize.height - 10);
+            doc.save("Rank_Prediction_Results.pdf");
         }
 
         fetchResults();
