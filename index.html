@@ -23,9 +23,30 @@
         input, button { font-size: 16px; padding: 8px; width: 100%; border: 1px solid #ccc; border-radius: 4px; }
         button { background-color: #007bff; color: white; border: none; cursor: pointer; }
         button:hover { background-color: #0056b3; }
+
+        /* Prevent Screenshot */
+        @media screen and (-webkit-min-device-pixel-ratio:0) {
+            body {
+                filter: blur(10px);
+            }
+        }
+
+        /* Watermark */
+        #watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            color: rgba(255, 0, 0, 0.3);
+            z-index: 1000;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
+    <div id="watermark">Confidential Data - No Screenshots Allowed</div>
+    
     <div class="container">
         <h2>Opening and Closing Ranks</h2>
         <form id="rankForm">
@@ -57,37 +78,23 @@
     </div>
 
     <script>
-       async function fetchData() {
+        async function fetchData() {
             try {
-                const response = await fetch('https://Agam-Puri-1905.github.io/rank-predictor/rank_data.json');
+                const jsonUrl = "rank_data.json"; // Works locally and on GitHub
+                console.log("Fetching JSON from:", jsonUrl);
+
+                const response = await fetch(jsonUrl);
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
+
                 const data = await response.json();
+                console.log("Fetched Data:", data);
                 populateDatalists(data);
             } catch (error) {
                 console.error("Error fetching JSON data:", error);
                 alert("Failed to load data. Ensure 'rank_data.json' is accessible.");
             }
-        }
-
-        function populateDatalists(data) {
-            const institutes = ["All", ...new Set(data.map(item => item.Institute || "Unknown"))];
-            const programs = ["All", ...new Set(data.map(item => item.AcademicProgram || "Unknown"))];
-            const quotas = ["All", ...new Set(data.map(item => item.Quota || "Unknown"))];
-            const seatTypes = ["All", ...new Set(data.map(item => item.SeatType || "Unknown"))];
-            const genders = ["All", ...new Set(data.map(item => item.Gender || "Unknown"))];
-
-            fillDatalist('instituteList', institutes);
-            fillDatalist('programList', programs);
-            fillDatalist('quotaList', quotas);
-            fillDatalist('seatTypeList', seatTypes);
-            fillDatalist('genderList', genders);
-        }
-
-        function fillDatalist(id, values) {
-            const datalist = document.getElementById(id);
-            datalist.innerHTML = values.map(val => `<option value="${val}">${val}</option>`).join('');
         }
 
         function predictRank() {
@@ -107,10 +114,12 @@
             window.location.href = `results.html${queryString}`;
         }
 
-        // Prevent screenshot using Print Screen
+        // Prevent Print Screen screenshot
         document.addEventListener("keydown", function (event) {
             if (event.key === "PrintScreen") {
                 alert("Screenshots are disabled.");
+                document.body.style.opacity = "0"; 
+                setTimeout(() => { document.body.style.opacity = "1"; }, 500);
                 event.preventDefault();
             }
         });
