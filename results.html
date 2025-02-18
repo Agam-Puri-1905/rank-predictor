@@ -58,20 +58,37 @@
     <script>
         async function fetchResults() {
             try {
-                const jsonUrl = "rank_data.json"; // Works locally and on GitHub
-                console.log("Fetching JSON from:", jsonUrl);
+                const params = new URLSearchParams(window.location.search);
+                const rank = parseInt(params.get("rank"), 10);
+                const filters = {
+                    institute: params.get("institute"),
+                    program: params.get("program"),
+                    quota: params.get("quota"),
+                    seatType: params.get("seatType"),
+                    gender: params.get("gender"),
+                };
 
-                const response = await fetch(jsonUrl);
+                const response = await fetch("rank_data.json");
                 const data = await response.json();
 
-                document.querySelector("tbody").innerHTML = data.map(row => `
+                const filteredData = data.filter(item =>
+                    (filters.institute === "All" || item.Institute === filters.institute) &&
+                    (filters.program === "All" || item.AcademicProgram === filters.program) &&
+                    (filters.quota === "All" || item.Quota === filters.quota) &&
+                    (filters.seatType === "All" || item.SeatType === filters.seatType) &&
+                    (filters.gender === "All" || item.Gender === filters.gender) &&
+                    rank >= item.OpeningRank && rank <= item.ClosingRank
+                );
+
+                document.querySelector("tbody").innerHTML = filteredData.length ? filteredData.map(row => `
                     <tr><td>${row.Institute}</td><td>${row.AcademicProgram}</td><td>${row.Quota}</td><td>${row.SeatType}</td><td>${row.Gender}</td><td>${row.OpeningRank}</td><td>${row.ClosingRank}</td></tr>
-                `).join('');
+                `).join('') : "<tr><td colspan='7'>No results found.</td></tr>";
             } catch (error) {
-                console.error("Error fetching JSON data:", error);
                 alert("Failed to load data.");
+                console.error(error);
             }
         }
+
         fetchResults();
     </script>
 </body>
