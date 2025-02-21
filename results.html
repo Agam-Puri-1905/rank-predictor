@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rank Prediction Results</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
@@ -16,27 +17,9 @@
         h2 { color: #0056b3; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid black; padding: 8px; text-align: left; }
-
-        /* Watermark */
-        #watermark {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2rem;
-            color: rgba(255, 0, 0, 0.3);
-            z-index: 1000;
-            pointer-events: none;
-        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>Your Custom Header</h2>
-    </div>
-
-    <div id="watermark">Confidential Data - No Screenshots Allowed</div>
-
     <div class="container">
         <h2>Rank Prediction Results</h2>
         <table id="results">
@@ -56,10 +39,6 @@
     </div>
     
     <button onclick="downloadPDF()">Download as PDF</button>
-    
-    <div class="footer">
-        <p>Your Custom Footer</p>
-    </div>
     
     <script>
         async function fetchResults() {
@@ -95,13 +74,50 @@
             }
         }
 
-        function downloadPDF() {
-            const jsPDF = window.jspdf.jsPDF;
-            const doc = new jsPDF();
-            doc.text("Your Custom Header", 20, 10);
-            doc.autoTable({ html: "#results" });
-            doc.text("Your Custom Footer", 20, doc.internal.pageSize.height - 10);
-            doc.save("Rank_Prediction_Results.pdf");
+        async function downloadPDF() {
+            try {
+                const existingPdfBytes = await fetch("JEE Mains College Predictor PDF.pdf").then(res => res.arrayBuffer());
+                const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+                let pages = pdfDoc.getPages();
+                
+                if (pages.length < 2) {
+                    pdfDoc.addPage();
+                }
+                
+                const secondPage = pages[1];
+                const { width, height } = secondPage.getSize();
+                
+                const jsPDF = window.jspdf.jsPDF;
+                const tempDoc = new jsPDF({ orientation: "portrait", unit: "pt", format: [width, height] });
+                tempDoc.setFontSize(14);
+                tempDoc.text("Rank Prediction Results", 40, 50);
+                
+                tempDoc.autoTable({
+                    startY: 80,
+                    head: [["Institute", "Program", "Quota", "Seat Type", "Gender", "Opening Rank", "Closing Rank"]],
+                    body: Array.from(document.querySelectorAll("#results tbody tr")).map(row => 
+                        Array.from(row.querySelectorAll("td")).map(td => td.innerText)
+                    ),
+                    theme: "grid",
+                    margin: { left: 40, right: 40 }
+                });
+                
+                const pdfBytes = await tempDoc.output("arraybuffer");
+                const newPdf = await PDFLib.PDFDocument.load(pdfBytes);
+                const [newPage] = await pdfDoc.copyPages(newPdf, [0]);
+                pdfDoc.removePage(1);
+                pdfDoc.insertPage(1, newPage);
+                
+                const finalPdfBytes = await pdfDoc.save();
+                const blob = new Blob([finalPdfBytes], { type: "application/pdf" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "Updated_College_Predictor.pdf";
+                link.click();
+            } catch (error) {
+                alert("Failed to generate PDF.");
+                console.error(error);
+            }
         }
 
         fetchResults();
